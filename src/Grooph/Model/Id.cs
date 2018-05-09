@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Grooph
+namespace Grooph.Model
 {
     public sealed class Id : IEquatable<Id>
     {

@@ -1,4 +1,4 @@
-﻿namespace Grooph
+﻿namespace Grooph.Model
 {
     public interface IPath
     {

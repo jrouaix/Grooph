@@ -1,4 +1,6 @@
-﻿namespace Grooph
+﻿using Grooph;
+
+namespace Grooph.Model
 {
     class Path<TSeed> : IPath<TSeed>
         where TSeed : struct
