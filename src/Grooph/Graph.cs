@@ -81,6 +81,11 @@ namespace Grooph
         }
         #endregion
 
+        #region Select
+        public IEnumerable<Vertex> Vertexes { get => _vertexes.Values; }
+        public IEnumerable<Edge> Edges { get => _edges.Values; }
+        #endregion
+
         #region Merge
         public void MergeVertex<T>(string collection, string key, Func<T, T> mergeFunction) where T : class
         {
@@ -168,6 +173,5 @@ namespace Grooph
         }
         #endregion
 
-     
     }
 }

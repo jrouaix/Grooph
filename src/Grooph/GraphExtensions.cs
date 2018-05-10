@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Grooph
 {
-    public static class GraphExtenions
+    public static class GraphExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string N<T>() => typeof(T).Name;
@@ -33,5 +33,32 @@ namespace Grooph
 
         public static void InsertEdgeIfNotExists<T, TFrom, TTo>(this Graph graph, string key, T value, string fromKey, string toKey)
             where T : class => graph.MergeEdge<T>(N<T>(), key, t => t ?? value, N<TFrom>(), fromKey, N<TTo>(), toKey);
+
+
+
+
+        /// <summary>
+        /// Dot format printout
+        /// http://viz-js.com/
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="toString"></param>
+        /// <returns></returns>
+        public static string GetDot(this Graph graph, Func<object, string> toString = null)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("graph {");
+
+            string escape(object value) => value.ToString().Replace("\"", "\"\"");
+
+            foreach (var edge in graph.Edges)
+            {
+                sb.AppendLine($"\"{escape(edge.From)}\" -> \"{escape(edge.To)}\";");
+            }
+
+            sb.AppendLine("}");
+
+            return sb.ToString();
+        }
     }
 }

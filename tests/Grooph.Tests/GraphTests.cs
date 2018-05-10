@@ -254,7 +254,8 @@ namespace Grooph.Tests
             g.UpsertEdge("x", "x13", new { enabled = false, change = 1m }, "a", "a2", "a", "a3");
             g.UpsertEdge("x", "x24", new { enabled = true, change = 1.1m }, "a", "a2", "a", "a4");
             g.UpsertEdge("x", "x45", new { enabled = true, change = 1.2m }, "a", "a4", "a", "a5");
-
+            
+            _output.WriteLine(g.GetDot());
 
             {
                 var START = 100m;
