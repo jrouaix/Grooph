@@ -34,48 +34,5 @@ namespace Grooph
 
         public static void InsertEdgeIfNotExists<T, TFrom, TTo>(this Graph graph, string key, T value, string fromKey, string toKey)
             where T : class => graph.MergeEdge<T>(N<T>(), key, t => t ?? value, N<TFrom>(), fromKey, N<TTo>(), toKey);
-
-
-
-
-        /// <summary>
-        /// Dot format printout
-        /// http://viz-js.com/
-        /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="toString"></param>
-        /// <returns></returns>
-        public static string GetDot(this Graph graph, Func<object, string> toString = null)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine("digraph {");
-
-            toString = toString ?? (o =>
-            {
-                if (o == null) return string.Empty;
-                switch (o)
-                {
-                    case Vertex v: return v.Id.ToString();
-                    case Edge v: return v.Id.ToString();
-                    default: return o.ToString();
-                }
-            });
-
-            string escape(object value) => value.ToString().Replace("\"", "\"\"");
-
-            foreach (var vertex in graph.Vertexes)
-            {
-                sb.AppendLine($"\"{escape(vertex.Id)}\";");
-            }
-
-            foreach (var edge in graph.Edges)
-            {
-                sb.AppendLine($"\"{escape(edge.From)}\" -> \"{escape(edge.To)}\" [label=\"{escape(edge.Id)}\"];");
-            }
-
-            sb.AppendLine("}");
-
-            return sb.ToString();
-        }
     }
 }
