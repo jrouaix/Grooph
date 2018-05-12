@@ -54,5 +54,43 @@ namespace Grooph.Tests
 ");
         }
 
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(0)]
+        [InlineData(10)]
+        [InlineData(100)]
+        public void GenerateLinearGraph(int length)
+        {
+            var graph = Assets.GenerateLinearGraph(length, i => i.ToString());
+            var dot = graph.GetDot();
+            _output.WriteLine(dot);
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(0)]
+        [InlineData(10)]
+        [InlineData(100)]
+        public void GenerateHeavyClusterGraph(int vertexCount)
+        {
+            var graph = Assets.GenerateHeavyClusterGraph(vertexCount, i => i.ToString());
+            var dot = graph.GetDot();
+            _output.WriteLine(dot);
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(0)]
+        [InlineData(10)]
+        [InlineData(50)]
+        [InlineData(100)]
+        [InlineData(1000)]
+        public void GenerateRandomGraph(int vertexCount)
+        {
+            var graph = Assets.GenerateRandomGraph(vertexCount, i => i.ToString());
+            var dot = graph.GetDot();
+            _output.WriteLine(dot);
+        }
+
     }
 }

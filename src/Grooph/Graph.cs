@@ -12,21 +12,22 @@ namespace Grooph
         readonly Dictionary<Id, HashSet<Id>> _outbounds = new Dictionary<Id, HashSet<Id>>();
 
         #region Upsert
-        public void UpsertVertex(string collection, string key, object value)
+        public Id UpsertVertex(string collection, string key, object value)
         {
             var id = new Id(collection, key);
-            UpsertVertex(id, value);
+            return UpsertVertex(id, value);
         }
 
-        public void UpsertVertex(Id id, object value)
+        public Id UpsertVertex(Id id, object value)
         {
             _vertexes[id] = new Vertex(id, value);
+            return id;
         }
 
-        public void UpsertEdge(string collection, string key, object value, string fromCollection, string fromKey, string toCollection, string toKey)
+        public Id UpsertEdge(string collection, string key, object value, string fromCollection, string fromKey, string toCollection, string toKey)
             => UpsertEdge(new Id(collection, key), value, new Id(fromCollection, fromKey), new Id(toCollection, toKey));
 
-        void UpsertEdge(Id id, object value, Id from, Id to)
+        public Id UpsertEdge(Id id, object value, Id from, Id to)
         {
             _edges[id] = new Edge(id, value, from, to);
 
@@ -39,6 +40,8 @@ namespace Grooph
             {
                 if (!set.Contains(id)) set.Add(id);
             }
+
+            return id;
         }
         #endregion
 
@@ -87,23 +90,23 @@ namespace Grooph
         #endregion
 
         #region Merge
-        public void MergeVertex<T>(string collection, string key, Func<T, T> mergeFunction) where T : class
+        public Id MergeVertex<T>(string collection, string key, Func<T, T> mergeFunction) where T : class
         {
             var value = GetVertex<T>(collection, key);
             value = mergeFunction(value);
-            UpsertVertex(collection, key, value);
+            return UpsertVertex(collection, key, value);
         }
 
-        public void MergeEdge<T>(string collection, string key, Func<T, T> mergeFunction, string fromCollection, string fromKey, string toCollection, string toKey)
+        public Id MergeEdge<T>(string collection, string key, Func<T, T> mergeFunction, string fromCollection, string fromKey, string toCollection, string toKey)
             where T : class
             => MergeEdge<T>(new Id(collection, key), mergeFunction, new Id(fromCollection, fromKey), new Id(toCollection, toKey));
 
-        void MergeEdge<T>(Id id, Func<T, T> mergeFunction, Id from, Id to)
+        Id MergeEdge<T>(Id id, Func<T, T> mergeFunction, Id from, Id to)
             where T : class
         {
             var value = GetEdge<T>(id);
             value = mergeFunction(value);
-            UpsertEdge(id, value, from, to);
+            return UpsertEdge(id, value, from, to);
         }
         #endregion
 

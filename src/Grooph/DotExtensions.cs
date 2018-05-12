@@ -11,9 +11,9 @@ namespace Grooph
         /// Dot format printout
         /// http://viz-js.com/
         /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="toString"></param>
-        /// <returns></returns>
+        /// <param name="graph">Graph</param>
+        /// <param name="toString">ToString() override if given</param>
+        /// <returns>dot graph format visualisation</returns>
         public static string GetDot(this Graph graph, Func<object, string> toString = null)
         {
             var sb = new StringBuilder();

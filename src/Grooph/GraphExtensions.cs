@@ -11,7 +11,6 @@ namespace Grooph
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string N<T>() => typeof(T).Name;
 
-
         public static void UpsertVertex<T>(this Graph graph, string key, T value) where T : class => graph.UpsertVertex(N<T>(), key, value);
 
         public static T GetVertex<T>(this Graph graph, string key) where T : class => graph.GetVertex<T>(N<T>(), key);
