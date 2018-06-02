@@ -12,7 +12,7 @@
     <PackageProjectUrl>https://github.com/jrouaix/Grooph</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/jrouaix/Grooph/master/icon.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/jrouaix/Grooph</RepositoryUrl>
-    <PackageTags>graph</PackageTags>
+    <PackageTags>graph mermaid dot GraphViz</PackageTags>
   </PropertyGroup>
 
 </Project>
