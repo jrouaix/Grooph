@@ -1,8 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>Latest</LangVersion>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Description>I am Grooph.</Description>
+    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/jrouaix/Grooph</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/jrouaix/Grooph/master/icon.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/jrouaix/Grooph</RepositoryUrl>
+    <PackageTags>graph</PackageTags>
   </PropertyGroup>
 
 </Project>
