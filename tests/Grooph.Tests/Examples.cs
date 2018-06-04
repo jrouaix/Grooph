@@ -1,5 +1,6 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
+using Grooph.Model;
 using SharpCompress.Archives;
 using System;
 using System.Collections.Generic;
@@ -39,6 +40,40 @@ namespace Grooph.Tests
         [Fact]
         public async Task Test()
         {
+            var graph = new Graph();
+
+            var titles = GetTITLEs()
+                .Take(100000)
+                .Select(t => t.GetTitleObject())
+                ;
+
+            var names = GetNAMEs()
+                .Take(100000)
+                .Select(n => n.GetNameObject())
+                ;
+
+            foreach (var title in titles) graph.UpsertVertex(title.Id, title);
+            foreach (var name in names) graph.UpsertVertex(name.Id, name);
+
+            var principals = GetPRINCIPALS()
+                .Take(1000000)
+                ;
+
+            foreach (var cast in principals)
+            {
+                var title = graph.GetVertex<Title>(cast.tconst);
+                if (title == null) continue;
+
+                var actor = graph.GetVertex<Actor>(cast.nconst);
+                if (actor == null) continue;
+
+                var playedIn = cast.GetPlayedIn();
+                var hasCast = cast.GetHasCast();
+
+                graph.UpsertEdge<PlayedIn, Actor, Title>(playedIn.Id, playedIn, actor.Id, title.Id);
+                graph.UpsertEdge<HasCast, Title, Actor>(hasCast.Id, hasCast, title.Id, actor.Id);
+            }
+
             //var results = GetTitles()
             //    .GroupBy(k => k.startYear)
             //    .Select(g => new { g.Key, count = g.Count() })
@@ -50,8 +85,6 @@ namespace Grooph.Tests
             //    _output.WriteLine($"{item.Key} : {item.count}");
             //}
         }
-
-
 
         private async Task DownloadImdbDataSet(string uri, string fileName)
         {
@@ -72,12 +105,42 @@ namespace Grooph.Tests
             }
         }
 
-        IEnumerable<Title> GetTitles() => GetRecords<Title>(TITLES_FILE);
-        IEnumerable<Title> GetPrincipals() => GetRecords<Title>(PRINCIPALS_FILE);
-        IEnumerable<Title> GetNames() => GetRecords<Title>(NAMES_FILE);
+        private class Title
+        {
+            public string Id { get; set; }
+            public string Name { get; set; }
+            public int RuntimeMinutes { get; set; }
+            public string[] Genres { get; set; }
+            public int Year { get; set; }
+        }
 
+        private class PlayedIn
+        {
+            public string Id { get; set; }
+            public string Category { get; internal set; }
+            public string Role { get; set; }
+        }
 
-        IEnumerable<TRecord> GetRecords<TRecord>(string file)
+        private class HasCast
+        {
+            public string Id { get; set; }
+            public string Category { get; internal set; }
+            public string Role { get; set; }
+        }
+
+        private class Actor
+        {
+            public string Id { get; set; }
+            public string Name { get; set; }
+            public int BirthYear { get; set; }
+            public int? DeathYear { get; set; }
+        }
+
+        IEnumerable<TITLE> GetTITLEs() => GetRecords<TITLE>(TITLES_FILE);
+        IEnumerable<PRINCIPALS> GetPRINCIPALS() => GetRecords<PRINCIPALS>(PRINCIPALS_FILE);
+        IEnumerable<NAME> GetNAMEs() => GetRecords<NAME>(NAMES_FILE);
+
+        private IEnumerable<TRecord> GetRecords<TRecord>(string file)
             where TRecord : new()
         {
             using (var fileStream = File.OpenRead(file))
@@ -89,7 +152,7 @@ namespace Grooph.Tests
             }
         }
 
-        class Title
+        private class TITLE
         {
             public string tconst { get; set; }
             public string titleType { get; set; }
@@ -100,15 +163,60 @@ namespace Grooph.Tests
             public string endYear { get; set; }
             public string runtimeMinutes { get; set; }
             public string genres { get; set; }
+
+            public Title GetTitleObject()
+            {
+                return new Title
+                {
+                    Id = tconst,
+                    Name = originalTitle,
+                    Year = int.TryParse(startYear, out var year) ? year : 0,
+                    RuntimeMinutes = int.TryParse(runtimeMinutes, out var lenth) ? lenth : 0,
+                    Genres = genres?.Split(",", StringSplitOptions.RemoveEmptyEntries),
+                };
+            }
         }
 
-        class Principals
+        private class PRINCIPALS
         {
             public string tconst { get; set; }
-            public string principalCast { get; set; }
+            public string ordering { get; set; }
+            public string nconst { get; set; }
+            public string category { get; set; }
+            public string job { get; set; }
+            public string characters { get; set; }
+
+            string GetRoleName() => this.characters
+                .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                .Where(s => s != @"\N")
+                .FirstOrDefault();
+
+            public PlayedIn GetPlayedIn()
+            {
+                var id = $"{nconst} played in {tconst}";
+
+                return new PlayedIn
+                {
+                    Id = id,
+                    Category = this.category,
+                    Role = GetRoleName(),
+                };
+            }
+
+            public HasCast GetHasCast()
+            {
+                var id = $"{tconst} has in cast {nconst}";
+
+                return new HasCast
+                {
+                    Id = id,
+                    Category = this.category,
+                    Role = GetRoleName(),
+                };
+            }
         }
 
-        class Name
+        private class NAME
         {
             public string nconst { get; set; }
             public string primaryName { get; set; }
@@ -116,6 +224,17 @@ namespace Grooph.Tests
             public string deathYear { get; set; }
             public string primaryProfession { get; set; }
             public string knownForTitles { get; set; }
+
+            public Actor GetNameObject()
+            {
+                return new Actor
+                {
+                    Id = nconst,
+                    Name = primaryName,
+                    BirthYear = int.TryParse(birthYear, out var year) ? year : 0,
+                    DeathYear = int.TryParse(deathYear, out var death) ? death : 0,
+                };
+            }
         }
     }
 }
