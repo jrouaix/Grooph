@@ -2,7 +2,7 @@
 
 namespace Grooph.Model
 {
-    public sealed class Id : IEquatable<Id>
+    public struct Id : IEquatable<Id>
     {
         private readonly string _id;
 
@@ -23,8 +23,7 @@ namespace Grooph.Model
 
         public override bool Equals(object obj) => (obj is Id other) && Equals(other);
 
-        public static bool operator ==(Id i1, Id i2) => i1?.Equals(i2) ?? ReferenceEquals(i1, i2);
+        public static bool operator ==(Id i1, Id i2) => i1.Equals(i2);
         public static bool operator !=(Id i1, Id i2) => !(i1 == i2);
-
     }
 }
