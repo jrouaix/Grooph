@@ -43,22 +43,32 @@ namespace Grooph.Tests
             var graph = new Graph();
 
             var titles = GetTITLEs()
-                .Take(100000)
+                .Where(t => t.isAdult == 0)
+                .Where(t => int.TryParse(t.startYear, out var year) && year >= 1981 && year <= 1990)
+                .Where(t => t.titleType == "movie" && t.isAdult == 0)
+                //.Take(100000)
                 .Select(t => t.GetTitleObject())
                 ;
 
+            var count = 0;
+            foreach (var title in titles) { count++; graph.UpsertVertex(title.Id, title); }
+            _output.WriteLine($"{count} titles.");
+
             var names = GetNAMEs()
-                .Take(100000)
+                .Where(n => int.TryParse(n.birthYear, out var year) && year <= 1990)
+                //.Take(100000)
                 .Select(n => n.GetNameObject())
                 ;
 
-            foreach (var title in titles) graph.UpsertVertex(title.Id, title);
-            foreach (var name in names) graph.UpsertVertex(name.Id, name);
+            count = 0;
+            foreach (var name in names) { count++; graph.UpsertVertex(name.Id, name); }
+            _output.WriteLine($"{count} names.");
 
             var principals = GetPRINCIPALS()
-                .Take(1000000)
+                //.Take(1000)
                 ;
 
+            count = 0;
             foreach (var cast in principals)
             {
                 var title = graph.GetVertex<Title>(cast.tconst);
@@ -70,20 +80,41 @@ namespace Grooph.Tests
                 var playedIn = cast.GetPlayedIn();
                 var hasCast = cast.GetHasCast();
 
+                count++;
                 graph.UpsertEdge<PlayedIn, Actor, Title>(playedIn.Id, playedIn, actor.Id, title.Id);
                 graph.UpsertEdge<HasCast, Title, Actor>(hasCast.Id, hasCast, title.Id, actor.Id);
             }
+            _output.WriteLine($"{count} relations.");
+        }
 
-            //var results = GetTitles()
-            //    .GroupBy(k => k.startYear)
-            //    .Select(g => new { g.Key, count = g.Count() })
-            //    .OrderBy(g => g.Key)
-            //    ;
+        [Fact]
+        public void SomeStats()
+        {
+            void incrementKey(Dictionary<string, int> dico, string key)
+            {
+                if (dico.TryGetValue(key, out var value))
+                    dico[key] = value + 1;
+                else
+                    dico[key] = 1;
+            }
 
-            //foreach (var item in results)
-            //{
-            //    _output.WriteLine($"{item.Key} : {item.count}");
-            //}
+            var titlesCountByYear = new Dictionary<string, int>();
+            var titleByType = new Dictionary<string, int>();
+            var titleByAdult = new Dictionary<string, int>();
+
+            foreach (var t in GetTITLEs())
+            {
+                incrementKey(titlesCountByYear, t.startYear);
+                incrementKey(titleByType, t.titleType);
+                incrementKey(titleByAdult, t.isAdult == 0 ? "nope" : "yeah!");
+            }
+
+            _output.WriteLine(Environment.NewLine + "Adult movie or not ?");
+            foreach (var item in titleByAdult.OrderBy(kv => kv.Key)) _output.WriteLine($"    {item.Key} : {item.Value}");
+            _output.WriteLine(Environment.NewLine + "Movies count by type :");
+            foreach (var item in titleByType.OrderBy(kv => kv.Key)) _output.WriteLine($"    {item.Key} : {item.Value}");
+            _output.WriteLine(Environment.NewLine + "Movies count by year :");
+            foreach (var item in titlesCountByYear.OrderBy(kv => kv.Key)) _output.WriteLine($"    {item.Key} : {item.Value}");
         }
 
         private async Task DownloadImdbDataSet(string uri, string fileName)
