@@ -56,6 +56,7 @@ namespace Grooph.Tests
 
             var names = GetNAMEs()
                 .Where(n => int.TryParse(n.birthYear, out var year) && year <= 1990)
+                .Where(n => n.Famousness > 2)
                 //.Take(100000)
                 .Select(n => n.GetNameObject())
                 ;
@@ -85,6 +86,8 @@ namespace Grooph.Tests
                 graph.UpsertEdge<HasCast, Title, Actor>(hasCast.Id, hasCast, title.Id, actor.Id);
             }
             _output.WriteLine($"{count} relations.");
+
+
         }
 
         [Fact]
@@ -103,7 +106,7 @@ namespace Grooph.Tests
             var titleByAdult = new Dictionary<string, int>();
 
             foreach (var t in GetTITLEs())
-            {
+            { 
                 incrementKey(titlesCountByYear, t.startYear);
                 incrementKey(titleByType, t.titleType);
                 incrementKey(titleByAdult, t.isAdult == 0 ? "nope" : "yeah!");
@@ -115,6 +118,15 @@ namespace Grooph.Tests
             foreach (var item in titleByType.OrderBy(kv => kv.Key)) _output.WriteLine($"    {item.Key} : {item.Value}");
             _output.WriteLine(Environment.NewLine + "Movies count by year :");
             foreach (var item in titlesCountByYear.OrderBy(kv => kv.Key)) _output.WriteLine($"    {item.Key} : {item.Value}");
+
+            var actorsByHowFamous = new Dictionary<string, int>();
+            foreach (var n in GetNAMEs())
+            {
+                incrementKey(actorsByHowFamous, n.Famousness.ToString());
+            }
+
+            _output.WriteLine(Environment.NewLine + "Actors by 'famousness' :");
+            foreach (var item in actorsByHowFamous.OrderBy(kv => kv.Key)) _output.WriteLine($"    {item.Key} : {item.Value}");
         }
 
         private async Task DownloadImdbDataSet(string uri, string fileName)
@@ -266,6 +278,8 @@ namespace Grooph.Tests
                     DeathYear = int.TryParse(deathYear, out var death) ? death : 0,
                 };
             }
+
+            public int Famousness => knownForTitles?.Count(c => c == ',') ?? 0;
         }
     }
 }
